@@ -30,7 +30,7 @@ class Battery:
 
         result = {}
 
-        if stderr == 'None':
+        if stderr != None:
             result['error'] = stderr.decode('utf-8')
         else:
             """
@@ -56,6 +56,7 @@ class Battery:
 class Window(QMainWindow):
     battery = {}
     _skin_dir = path.dirname(path.realpath(__file__))+"/skins"
+    _alert_show = True
 
     def __init__(self, argv):
         # QMainWindow-en construct-a
@@ -86,6 +87,11 @@ class Window(QMainWindow):
                 self._skin_dir = self._skin_dir+"/"+argv[i+1]
             else:
                 self._skin_dir = self._skin_dir+"/default"
+
+            if argv[i]=='-ap' or argv[i]=='--alert-percent':
+                self._alert_percent = int(argv[i+1])
+            else:
+                self._alert_percent = 10
 
             i = i + 1
 
@@ -173,8 +179,16 @@ class Window(QMainWindow):
         self.battery = b.getInfo()        
         print('pyqt-battery:')
         print(self.battery)
-        if(self.battery['error']==None):
-            if self._tray and interactive == True:
+
+        if self.battery['type']=='charging' or self.battery['type']=='full':
+            self._alert_show = True
+
+        if self.battery['error']==None:
+            if self._tray and self._alert_percent <= self.battery['percent'] and self._alert_show == True and self.battery['type'] == 'discharging':
+                self._alert_show = False
+                self.tray_icon.showMessage('pyqt-battery: ATTENTION', self.battery['text'])
+
+            elif self._tray and interactive == True:
                 self.tray_icon.showMessage('pyqt-battery:', self.battery['text'])
             if self._desktop:
                 self.setWindowTitle(self.battery['text'])
