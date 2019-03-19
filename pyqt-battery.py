@@ -50,12 +50,23 @@ class Battery:
             result['error'] = None
             result['type'] = p.group(1).lower()
             result['percent'] = int(p.group(2))
+            result['percent_icon'] = self._iconPercent(result['percent'])
             result['text'] = r
 
         return result
 
+    # hondarrarekin jolasten dugu, iconoaren path-a egokitzeko
+    def _iconPercent(self, percent):
+        pp = int(percent / 10) * 10
+        if percent%10>5:
+            pp = pp + 10
+        pp = str(pp)
+        return pp    
+
 class Window(QMainWindow):
     _skin_dir = path.dirname(path.realpath(__file__))+"/skins"
+    _current_percent_icon = None
+    _current_type = None
 
     def __init__(self, argv):
         # QMainWindow-en construct-a
@@ -90,7 +101,7 @@ class Window(QMainWindow):
             if argv[i]=='-ap' or argv[i]=='--alert-percent':
                 self._alert_percent = int(argv[i+1])
             else:
-                self._alert_percent = 10
+                self._alert_percent = 20
 
             i = i + 1
 
@@ -113,48 +124,45 @@ class Window(QMainWindow):
 
     def _trayUI(self):
         if self._tray:
+            # hasikeran ikonue hutsik
+            self._tray_icon = QSystemTrayIcon(QIcon(self._getIcon()), self)
+
+            # ikonue aldatu
             self._setIcon()
 
             # menua sortu
             self._setMenu()
 
             # tray_icon-ean click/right click egiterakoan sortzen den ebentoa
-            self.tray_icon.activated.connect(self._iconActivated)
+            self._tray_icon.activated.connect(self._iconActivated)
 
             # tray-a erakutsi
-            self.tray_icon.show()
+            self._tray_icon.show()
 
     def _desktopUI(self):
         if self._desktop:
             self._setIcon()
             self.showMinimized()
 
-    # ikonoa base64-n enkodeatu
     def _getIcon(self):
-        # hondarrarekin jolasten dugu, iconoaren path-a egokitzeko
-        p = self.battery['percent']
-        pp = int(p / 10) * 10
-        if p%10>5:
-            pp = pp + 10
-        pp = str(pp)
-
-        icon = self._skin_dir+self.battery['type']+"_"+pp+".png"
+        icon = self._skin_dir+self.battery['type']+"_"+self.battery['percent_icon']+".png"
         return icon
 
     def _setIcon(self):
         icon = self._getIcon()
+        icon = QIcon(icon)
 
         if self._desktop:
-            self.setWindowIcon(QIcon(icon))
+            self.setWindowIcon(icon)
 
         if self._tray:
-            self.tray_icon = QSystemTrayIcon(QIcon(icon), self)            
+            self._tray_icon.setIcon(icon)
 
     def _setMenu(self):
         menu = QMenu()
         action_exit = menu.addAction('Exit')
         action_exit.triggered.connect(exit)
-        self.tray_icon.setContextMenu(menu)
+        self._tray_icon.setContextMenu(menu)
 
     def _iconActivated(self, reason):
         if reason == 1:
@@ -173,7 +181,22 @@ class Window(QMainWindow):
     def _updateInfoFalse(self):
         self._updateInfo(False)
 
-    def _updateInfo(self, interactive):
+    def _updateInfo(self, interactive):            
+
+        if interactive:
+            if self.battery['percent']<self._alert_percent and self.battery['type']=='discharging':
+                warning = 'WARNING '
+            else:
+                warning = ''
+
+            if self._tray and interactive == True:
+                self._tray_icon.showMessage("pyqt-battery: "+warning, self.battery['text'])                            
+
+            if self._desktop:
+                self.setWindowTitle(warning+self.battery['text'])                
+
+            return False
+
         battery_old = self.battery
 
         b = Battery()
@@ -181,13 +204,23 @@ class Window(QMainWindow):
 
         if self.battery['error']==None:
 
-            if self._tray and interactive == True:
-                self.tray_icon.showMessage('pyqt-battery:', self.battery['text'])
+            if self.battery['percent']<self._alert_percent and self.battery['type']=='discharging':
+                warning = 'WARNING '
+            else:
+                warning = ''
 
-            if self._desktop:
-                self.setWindowTitle(self.battery['text'])
+            if self.battery['percent_icon']!=self._current_percent_icon or self.battery['type']!=self._current_type:
 
-            self._setIcon()
+                if self._tray and (warning!='' or self.battery['type']=='discharging'):
+                    self._tray_icon.showMessage("pyqt-battery: "+warning, self.battery['text'])                
+
+                if self._desktop:
+                    self.setWindowTitle(warning+self.battery['text'])
+
+                self._setIcon()
+
+                self._current_percent_icon = self.battery['percent_icon']
+                self._current_type = self.battery['type']
         else:
             print(self.battery['error'])
             exit()
