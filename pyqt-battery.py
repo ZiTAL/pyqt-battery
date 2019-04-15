@@ -81,10 +81,16 @@ class Window(QMainWindow):
         self._initUI()
 
     def _parseArgv(self, argv):
+        # default params
         self._credentials = {}
         self._interval = 1000
         self._tray = True
         self._desktop = True
+
+        
+        self._skin_dir = self._skin_dir+"/default/"
+        self._alert_percent = 20
+
         i = 0
         for arg in argv:
             if argv[i]=='-i' or argv[i]=='--interval':
@@ -95,13 +101,8 @@ class Window(QMainWindow):
                 self._desktop = False
             if argv[i]=='-s' or argv[i]=='--skin':
                 self._skin_dir = self._skin_dir+"/"+argv[i+1]+"/"
-            else:
-                self._skin_dir = self._skin_dir+"/default/"
-
             if argv[i]=='-ap' or argv[i]=='--alert-percent':
                 self._alert_percent = int(argv[i+1])
-            else:
-                self._alert_percent = 20
 
             i = i + 1
 
@@ -120,7 +121,7 @@ class Window(QMainWindow):
         self._desktopUI()
 
         # kargatzerakoan datuak hartu
-        self._updateInfo(True)        
+        self._updateInfo(False)        
 
     def _trayUI(self):
         if self._tray:
@@ -139,7 +140,7 @@ class Window(QMainWindow):
             # tray-a erakutsi
             self._tray_icon.show()
 
-    def _desktopUI(self):
+    def _desktopUI(self):        
         if self._desktop:
             self._setIcon()
             self.showMinimized()
@@ -181,8 +182,7 @@ class Window(QMainWindow):
     def _updateInfoFalse(self):
         self._updateInfo(False)
 
-    def _updateInfo(self, interactive):            
-
+    def _updateInfo(self, interactive):
         if interactive:
             if self.battery['percent']<self._alert_percent and self.battery['type']=='discharging':
                 warning = 'WARNING '
