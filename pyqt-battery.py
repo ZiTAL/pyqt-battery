@@ -67,6 +67,7 @@ class Window(QMainWindow):
     _skin_dir = path.dirname(path.realpath(__file__))+"/skins"
     _current_percent_icon = None
     _current_type = None
+    _first = True
 
     def __init__(self, argv):
         # QMainWindow-en construct-a
@@ -121,7 +122,7 @@ class Window(QMainWindow):
         self._desktopUI()
 
         # kargatzerakoan datuak hartu
-        self._updateInfo(False)        
+        self._updateInfo(False)
 
     def _trayUI(self):
         if self._tray:
@@ -224,6 +225,11 @@ class Window(QMainWindow):
         else:
             print(self.battery['error'])
             exit()
+
+        if self._first == True:
+            if self._tray:
+                self._tray_icon.showMessage("pyqt-battery: "+warning, self.battery['text'])
+            self._first = False
 
     def _help(self):
         h = """
