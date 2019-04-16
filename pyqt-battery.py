@@ -104,6 +104,8 @@ class Window(QMainWindow):
                 self._skin_dir = self._skin_dir+"/"+argv[i+1]+"/"
             if argv[i]=='-ap' or argv[i]=='--alert-percent':
                 self._alert_percent = int(argv[i+1])
+            if argv[i]=='-h' or argv[i]=='--help':                
+                self._help()
 
             i = i + 1
 
@@ -232,13 +234,19 @@ class Window(QMainWindow):
             self._first = False
 
     def _help(self):
-        h = """
-py-battery:
+        h = """pyqt-battery:
+*************
 Arguments:
-    -i,  --interval    time to refresh in miliseconds
-    -nd, --no-desktop  no desktop application
-    -nt, --no-tray     no tray application
-    -s, --skin         default skin is: default
+     -i, --interval    time to refresh in miliseconds   (default: 1000)
+    -nd, --no-desktop  no desktop application           (default: show)
+    -nt, --no-tray     no tray application              (default: show)
+     -s, --skin         skin folder name                 (default: default)
+     -h, --help         show this help
+
+Examples:
+    python3 pyqt-battery.py -i 2000 -nd
+    python3 pyqt-battery.py -nt
+    python3 pyqt-battery.py -s dark
         """
         print(h)
         exit()
