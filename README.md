@@ -1,25 +1,20 @@
-# pyqt-battery #
+# pyqt-battery #  
+Another fucking battery monitor build in python3 + pyqt5  
 
-Another fucking battery monitor build in python3 + pyqt5
-
-# dependencies #
-
-To install dependencies:
+# dependencies #  
+To install dependencies:  
 ```
 apt-get install python3-pyqt5 acpi
 ```
 
-# skins #
-
-Customizable skins, see **skins/default**
+# skins #  
+Customizable skins, see **skins/default**.  
 
 # standalone #
-
-Standalone version at https://github.com/ZiTAL/pyqt-battery/tree/master/dist
-
+Standalone version at https://github.com/ZiTAL/pyqt-battery/tree/master/dist  
 Also needs **skins** and **acpi** command.
 
-# usage #
+# usage #  
 ```
 Arguments:
      -i, --interval    time to refresh in miliseconds   (default: 1000)
