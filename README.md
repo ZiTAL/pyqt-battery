@@ -14,6 +14,12 @@ Customizable skins, see **skins/default**.
 Standalone version at https://github.com/ZiTAL/pyqt-battery/tree/master/dist  
 Also needs **skins** and **acpi** command.
 
+To build it:
+```
+pip install pyinstaller
+pyinstaller --onefile pyqt-battery.py
+```
+
 # usage #  
 ```
 Arguments:
